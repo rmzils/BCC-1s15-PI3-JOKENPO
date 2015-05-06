@@ -9,6 +9,6 @@
 #include "imagem.h"
 #include "connected.h"
 
-int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz);
+int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera *cam);
 
 #endif

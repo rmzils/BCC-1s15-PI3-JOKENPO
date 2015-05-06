@@ -23,8 +23,7 @@ void erosao_int(rastreador *r, unsigned char ***matriz, int k);
 
 void blur_simples(rastreador *r, unsigned char ***matriz, int k);
 
-void gaussian_blur(rastreador *r, unsigned char ***matriz);
-void gaussian_kernel(double kernel[][5]);
+void merge(rastreador *r, unsigned char ***matriz, unsigned char ***matriz_aux);
 
 void fritacao(rastreador *r, unsigned char ***matriz, int k);
 

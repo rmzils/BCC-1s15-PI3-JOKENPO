@@ -191,7 +191,7 @@ int conta_componentes(disjoint *d){
 void consiste_massa(rastreador *r, parametros *p, disjoint *d){
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
-		if(c->massa < p->massa_min)
+		if(c->massa < p->massa_min/2)
 			c->massa = 0;
 	}
 }

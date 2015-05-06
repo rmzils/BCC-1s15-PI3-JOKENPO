@@ -85,6 +85,8 @@ int main() {
 
   //calibra_dedos(p, r, matriz, cam);
 
+  calibra_mao(p, r, matriz, cam);
+
   al_start_timer(timer);
 
   while(continuar) {
@@ -102,34 +104,14 @@ int main() {
 
     if(atualizar && al_is_event_queue_empty(queue)){
 
-      while(1){
-        camera_atualiza(cam);
-
-        copia_quadro(matriz, cam->quadro, altura, largura);
-
-        camera_atualiza(cam);
-
-        camera_copia(cam, matriz, esquerda);
-
-        blur_simples(r, matriz, 10);
-
-        black_white_finger(r, p, matriz);
-
-        abertura(r, matriz, 10);
-
-        camera_copia(cam, matriz, direita);
-
-        al_flip_display();
-      }
-
-      while(1){
+      /*while(1){
         camera_atualiza(cam);
 
         copia_quadro(matriz, cam->quadro, altura, largura);
 
         camera_copia(cam, matriz, esquerda);
 
-        int jogada = analiza_jogada(r, p, matriz);
+        int jogada = analiza_jogada(r, p, matriz, cam);
 
         if(jogada == 0)
           printf("PEDRA\n");
@@ -149,7 +131,7 @@ int main() {
         camera_copia(cam, matriz, direita);
 
         al_flip_display();
-      }
+      }*/
 
       while(!contador(r)){
         camera_atualiza(cam);
@@ -162,7 +144,7 @@ int main() {
 
         abertura(r, matriz, 6);
 
-        erosao(r, matriz, 1, 5);
+        erosao(r, matriz, 3, 3);
 
         atualiza_rastreador(r, matriz);
 
@@ -175,48 +157,40 @@ int main() {
 
       printf("contou\n");
 
-      int movimentou = 1;
+      camera_atualiza(cam);
 
-      while(movimentou){
-        camera_atualiza(cam);
+      copia_quadro(matriz, cam->quadro, r->altura, r->largura);
 
+      camera_atualiza(cam);
+
+      while(detecta_movimento(r, matriz, cam->quadro)){
         copia_quadro(matriz, cam->quadro, r->altura, r->largura);
-
-        copia_quadro(matriz_anterior, cam->quadro, r->altura, r->largura);
 
         camera_copia(cam, matriz, esquerda);
 
-        black_white_hand(r,p,matriz);
+        black_white_hand(r, p, cam->quadro);
 
-        abertura(r, matriz, 6);
+        abertura(r, cam->quadro, 3);
 
-        erosao(r, matriz, 1, 5);
+        erosao(r, cam->quadro, 1, 10);
 
-        atualiza_rastreador(r, matriz);
-
-        al_draw_rectangle(r->w,r->n,r->e,r->s,cor,1);
-
-        camera_copia(cam, matriz, direita);
-
-        al_flip_display();
-
-        camera_atualiza(cam);
-
-        movimentou = detecta_movimento(r, matriz_anterior, cam->quadro);
+        atualiza_rastreador(r, cam->quadro);
 
         if(r->flag_descendo){
           printf("Era pra ter jogado e sua mão voltou a subir!\n");
           exit(EXIT_SUCCESS);
         }
+
+        al_draw_rectangle(r->w,r->n,r->e,r->s,cor,1);
+
+        camera_copia(cam, cam->quadro, direita);
+
+        camera_atualiza(cam);
+
+        al_flip_display();        
       };
 
-      camera_atualiza(cam);
-
-      copia_quadro(matriz, cam->quadro, altura, largura);
-
-      camera_copia(cam, matriz, esquerda);
-
-      int jogada = analiza_jogada(r, p, matriz);
+      int jogada = analiza_jogada(r, p, matriz, cam);
 
       if(jogada == 0)
         printf("PEDRA\n");
@@ -231,11 +205,11 @@ int main() {
       else
         printf("INVALIDA\n");
 
+      printf("min: %d max: %d\n", p->massa_min, p->massa_max);
+
       camera_copia(cam, matriz, direita);
 
       al_flip_display();
-
-      printf("%d\n", jogada);
     }
   }
 

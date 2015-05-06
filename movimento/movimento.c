@@ -60,14 +60,15 @@ int detecta_movimento(rastreador *r, unsigned char ***quadro1, unsigned char ***
 
 void atualiza_rastreador(rastreador *r, unsigned char ***quadro){
 	int i,j;
-	int north = r->n, south = r->s, west = r->w, east = r->e; 
+	int north = r->n; 
 
-	for(i = r->n; i < r->s; i++){
+	for(i = r->n; i < r->s && north == r->n; i++){
 		for(j = r->w + 1; j < r->e; j++){
 			if(quadro[i][j][0] == 255){
-				north = i - 100;
+				north = i - 50;
 				if(north < 0)
 					north = 0;
+				break;
 			}
 		}
 	}
@@ -75,22 +76,28 @@ void atualiza_rastreador(rastreador *r, unsigned char ***quadro){
 	if(r->s == r->altura)
 		r->s--;
 
-	for(i = r->s; i >= r->n; i--){
+	int south = r->s;
+
+	for(i = r->s; i >= r->n && south == r->s; i--){
 		for(j = r->w; j < r->e; j++){
 			if(quadro[i][j][0] == 255){
-				south = i + 100;
+				south = i + 50;
 				if(south > r->altura)
 					south = r->altura;
+				break;
 			}
 		}
 	}
 
-	for(j = r->w; j < r->e; j++){
+	int west = r->w;
+
+	for(j = r->w; j < r->e && west == r->w; j++){
 		for(i = r->n; i < r->s; i++){
 			if(quadro[i][j][0] == 255){
-				west = j - 100;
+				west = j - 50;
 				if(west < 0)
 					west = 0;
+				break;
 			}
 		}
 	}
@@ -98,12 +105,15 @@ void atualiza_rastreador(rastreador *r, unsigned char ***quadro){
 	if(r->e == r->largura)
 		r->e--;
 
-	for(j = r->e; j >= r->w; j--){
+	int east = r->e;
+
+	for(j = r->e; j >= r->w && east == r->e; j--){
 		for(i = r->n; i < r->s; i++){
 			if(quadro[i][j][0] == 255){
-				east = j + 100;
+				east = j + 50;
 				if(east > r->largura)
 					east = r->largura;
+				break;
 			}
 		}
 	}
@@ -113,7 +123,7 @@ void atualiza_rastreador(rastreador *r, unsigned char ***quadro){
 	r->w = west;
 	r->e = east;
 
-	int centro_mao = (r->s - r->n) + r->n;
+	int centro_mao = (r->s - r->n)/2 + r->n;
 
 	if(r->flag_descendo){
 		if(centro_mao >= r->delimitador){

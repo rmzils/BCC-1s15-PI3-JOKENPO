@@ -24,7 +24,6 @@ void black_white_hand(rastreador *r, parametros *p, unsigned char ***matriz){
 
 	for(int i = r->n; i < r->s; i++){
 		for(int j = r->w; j < r->e; j++){
-
 			if(matiz[i][j] >= p->matiz_mao_min && matiz[i][j] <= p->matiz_mao_max && saturacao[i][j] >= p->saturacao_mao){
 				matriz[i][j][0] = 255;
 				matriz[i][j][1] = 255;
@@ -250,56 +249,14 @@ void blur_simples(rastreador *r, unsigned char ***matriz, int k){
 	}
 }
 
-void gaussian_kernel(double kernel[][5]){
-	double sigma = 1.0;
-	double r, s = 2.0 * sigma * sigma;
-
-	double sum = 0.0;
-
-	for(int x = -2; x <= 2; x++){
-		for(int y = -2; y <= 2; y++){
-			r = sqrt(x*x + y*y);
-			kernel[x + 2][y + 2] = (exp(-(r*r)/s))/(PI * s);
-			sum += kernel[x + 2][y + 2];
-		}
-	}
-
-	for(int i = 0; i < 5; i++){
-		for(int j = 0; j < 5; j++)
-			kernel[i][j] /= sum;
-	}
-}
-
-void gaussian_blur(rastreador *r, unsigned char ***matriz){
-	int xk, yk;
-	double kernel[5][5];
-
-	gaussian_kernel(kernel);
-
-	double matriz_aux[r->s][r->e][3];
-
+void merge(rastreador *r, unsigned char ***matriz, unsigned char ***matriz_aux){
 	for(int i = r->n; i < r->s; i++){
 		for(int j = r->w; j < r->e; j++){
-			matriz_aux[i][j][0] = 0;
-			matriz_aux[i][j][1] = 0;
-			matriz_aux[i][j][2] = 0;
-			for(int x = i - 2, xk = 0; x <= i + 2; x++, xk++){
-				for(int y = j - 2, yk = 0; y <= j + 2; y++, yk++){
-					if((x >= 0 && x < r->altura) && (y >= 0 && y < r->largura)){
-						matriz_aux[i][j][0] += (matriz[x][y][0]) * kernel[xk][yk];
-						matriz_aux[i][j][1] += (matriz[x][y][1]) * kernel[xk][yk];
-						matriz_aux[i][j][2] += (matriz[x][y][2]) * kernel[xk][yk];
-					}
-				}
+			if(matriz[i][j][0] == 0 && matriz_aux[i][j][0] == 255){
+				matriz[i][j][0] == 255;
+				matriz[i][j][1] == 255;
+				matriz[i][j][2] == 255;
 			}
-		}
-	}
-
-	for(int i = r->n; i < r->s; i++){
-		for(int j = r->w; j < r->e; j++){
-			matriz[i][j][0] = matriz_aux[i][j][0];
-			matriz[i][j][1] = matriz_aux[i][j][1];
-			matriz[i][j][2] = matriz_aux[i][j][2];
 		}
 	}
 }

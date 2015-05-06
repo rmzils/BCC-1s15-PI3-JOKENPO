@@ -1,15 +1,29 @@
 #include "jogada.h"
 
-int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz){
+int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera *cam){
 	disjoint *d = aloca_disjoint(200);
 
-	black_white_finger(r,p,matriz);
+	camera_atualiza(cam);
 
-	erosao(r, matriz, 1, 3);
+    copia_quadro(matriz, cam->quadro, r->altura, r->largura);
 
-	dilatacao(r, matriz, 1, 3);
+    black_white_finger(r, p, matriz);
 
-	abertura(r, matriz, 5);
+    camera_atualiza(cam);
+
+    black_white_finger(r, p, cam->quadro);
+
+    merge(r, matriz, cam->quadro);
+
+    camera_atualiza(cam);
+
+    black_white_finger(r, p, cam->quadro);
+
+    merge(r, matriz, cam->quadro);
+
+	abertura(r, matriz, 10);
+
+	erosao(r, matriz, 1, 5);
 
 	connected_components(r, matriz, d);
 
@@ -51,8 +65,8 @@ int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz){
 
 	if(i == 3){
 		for(int j = 0; j < i; j++){
-			conjunto *c = d->conjuntos[indice_conjutos[j]];
-			if(c->massa >= 2*p->massa_min)
+			int massa = d->conjuntos[indice_conjutos[j]]->massa;
+			if(massa >= 2*p->massa_min)
 				return 4;
 		}
 

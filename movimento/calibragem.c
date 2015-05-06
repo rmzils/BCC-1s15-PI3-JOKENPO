@@ -7,9 +7,9 @@ parametros *aloca_parametros(){
 	p->matiz_dedo_max = 340;
 	p->saturacao_dedo = 30;
 	p->matiz_mao_min = 180;
-	p->matiz_mao_max = 240;
-	p->saturacao_mao = 50;
-	p->massa_min = 100;
+	p->matiz_mao_max = 220;
+	p->saturacao_mao = 30;
+	p->massa_min = 300;
 	p->massa_max = 0;
 
 	return p;
@@ -38,9 +38,9 @@ void calibra_mao(parametros *p, rastreador *r, unsigned char ***matriz, camera *
 
 		    black_white_hand(r,p,matriz);
 
-		    abertura(r, matriz, 5);
+		    abertura(r, matriz, 3);
 
-		    erosao(r, matriz, 1, 3);
+        	erosao(r, matriz, 3, 3);
 
 		    al_flip_display();
 
@@ -77,11 +77,23 @@ void calibra_dedos(parametros *p, rastreador *r, unsigned char ***matriz, camera
 
 	    copia_quadro(matriz, cam->quadro, r->altura, r->largura);
 
-		black_white_finger(r,p,matriz);
+        black_white_finger(r, p, matriz);
 
-		abertura(r, matriz, 5);
+        camera_atualiza(cam);
 
-		al_flip_display();
+        black_white_finger(r, p, cam->quadro);
+
+        merge(r, matriz, cam->quadro);
+
+        camera_atualiza(cam);
+
+        black_white_finger(r, p, cam->quadro);
+
+        merge(r, matriz, cam->quadro);
+
+		abertura(r, matriz, 3);
+
+		erosao(r, matriz, 1, 5);
 
 		connected_components(r, matriz, d);
 
@@ -103,6 +115,10 @@ void calibra_dedos(parametros *p, rastreador *r, unsigned char ***matriz, camera
   				p->massa_max = c->massa;
   		}
   	}
+
+  	p->massa_min = (3*p->massa_min)/2;
+
+  	printf("min: %d", p->massa_min);
 
   	libera_disjoint(d);
 }
