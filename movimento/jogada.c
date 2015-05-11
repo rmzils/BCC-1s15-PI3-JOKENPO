@@ -25,11 +25,15 @@ int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera
 
 	erosao(r, matriz, 1, 5);
 
+	dilatacao(r, matriz, 1, 5);
+
 	connected_components(r, matriz, d);
 
 	consiste_massa(r, p, d);
 
-	int indice_conjutos[d->n], i = 0;
+	int quantidade = conta_componentes(d);
+
+	int conjutos[quantidade], i = 0;
 
 	printf("componentes no final:");
 
@@ -37,7 +41,7 @@ int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera
 		conjunto *c = d->conjuntos[j];
 		if(c->massa > 0){
 			printf(" %d massa: %d |", c->num, c->massa);
-			indice_conjutos[i] = c->num;
+			conjutos[i] = c->massa;
 			i++;
 		}
 	}
@@ -54,21 +58,21 @@ int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera
 		return 0;
 	
 	if(i == 2){
-		for(int j = 0; j < i; j++){
-			int massa = d->conjuntos[indice_conjutos[j]]->massa;
-			if(massa > 2*p->massa_max)
-				return 1;
-		}
+		sort(conjuntos, quantidade);
+
+		if(conjuntos[0] > 2*conjuntos[1])
+			return 1;
 
 		return 3;
 	}
 
 	if(i == 3){
-		for(int j = 0; j < i; j++){
-			int massa = d->conjuntos[indice_conjutos[j]]->massa;
-			if(massa >= 2*p->massa_min)
-				return 4;
-		}
+		sort(conjuntos, quantidade);
+
+		int media = (conjuntos[0] + conjuntos[2])/2;
+
+		if(conjuntos[1] >= meida)
+			return 4;
 
 		return 2;
 	}
@@ -77,4 +81,14 @@ int analiza_jogada(rastreador *r, parametros *p, unsigned char ***matriz, camera
 		return 1;
 
 	return -1;
+}
+
+void sort(int conjuntos[], int quantidade){
+	for(int i = 0; i < quantidade - 1; i++){
+		if(conjuntos[i + 1] > conjuntos[i]){
+			int aux = conjuntos[i];
+			conjuntos[i] = conjuntos[i + 1];
+			conjuntos[i + 1] = aux;
+		}
+	}
 }
