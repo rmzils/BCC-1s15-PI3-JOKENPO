@@ -14,8 +14,10 @@ game.o: game.c game.h
 player.o: player.c player.h
 	$(CC) $(FLAGS) $< -c
 
+menu.o: menu.c menu.h
+	$(CC) $(FLAGS) $< -c
 
-main: main.c game.o player.o
+main: main.c game.o player.o menu.o
 	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
 
 clean:
