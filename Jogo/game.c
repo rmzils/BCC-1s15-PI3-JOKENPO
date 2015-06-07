@@ -1,241 +1,269 @@
 #include "game.h"
 
-#define FPS 60
+void erro(char *mensagem) {
+    fprintf(stderr, "%s\n", mensagem);
+
+    exit(EXIT_FAILURE);
+}
+
+void delay(int milliseconds){
+      long pause;
+      clock_t now,then;
+
+      pause = milliseconds*(CLOCKS_PER_SEC/1000);
+      now = then = clock();
+      while((now-then) < pause)
+            now = clock();
+}
 
 game *inicializa_game(){
 	game *g = malloc(sizeof(game));
 
 	g->p = inicializa_player();
 	g->npc = inicializa_player();
-	g->rodada = 1;
-	g->fase = 1;
-	g->continuar = 1;
-}
+	g->rodada = 0;
+    g->fase = 1;
 
-void erro(char *mensagem) {
-  	fprintf(stderr, "%s\n", mensagem);
-
-  	exit(EXIT_FAILURE);
-}
-
-void delay(int milliseconds){
-	  long pause;
-	  clock_t now,then;
-
-	  pause = milliseconds*(CLOCKS_PER_SEC/1000);
-	  now = then = clock();
-	  while((now-then) < pause)
-	    	now = clock();
-}
-
-void inicializa(){
-  	if(!al_init())
-    	erro("nao foi possivel inicializar allegro");
-
-  	if(!al_init_primitives_addon())
-    	erro("nao foi possivel inicializar adicional de primitivas");
-
-  	al_init_font_addon();
-
-  	if(!al_init_ttf_addon())
-    	erro("nao foi possivel inicializar adicional de formato de fontes");
-
-  	if(!al_install_audio())
-    	erro("nao foi possivel instalar audio");
-
-  	if(!al_init_acodec_addon())
-    	erro("nao foi possivel inicializar adicional de formato de som");
-
-  	if(!al_reserve_samples(1))
-    	erro("nao foi possivel inicializar canais de áudio");
+	return g;
 }
 
 int aloca_musicas(ALLEGRO_AUDIO_STREAM *musicas[]){
-  	if(!(musicas[0] = al_load_audio_stream("musicas/teste.ogg", 4, 1024)))
-    	return 0;
+    if(!(musicas[0] = al_load_audio_stream("musicas/teste.ogg", 4, 1024)))
+        return 0;
 
-  	return 1;
+    return 1;
 }
 
 int aloca_samples(ALLEGRO_SAMPLE *samples[]){
-  	if(!(samples[0] = al_load_sample("samples/maytheforce.wav")))
-    	return 0;
+    if(!(samples[0] = al_load_sample("Samples/maytheforce.wav")))
+        return 0;
 
-  	if(!(samples[1] = al_load_sample("samples/prepare.wav")))
-    	return 0;
+    if(!(samples[1] = al_load_sample("Samples/prepare.wav")))
+        return 0;
 
-  	if(!(samples[2] = al_load_sample("samples/firstblood.wav")))
-    	return 0;
+    if(!(samples[2] = al_load_sample("Samples/firstblood.wav")))
+        return 0;
 
-  	if(!(samples[3] = al_load_sample("samples/doublekill.wav")))
-    	return 0;
+    if(!(samples[3] = al_load_sample("Samples/doublekill.wav")))
+        return 0;
 
-  	if(!(samples[4] = al_load_sample("samples/killingspree.wav")))
-    	return 0;
+    if(!(samples[4] = al_load_sample("Samples/killingspree.wav")))
+        return 0;
 
-  	if(!(samples[5] = al_load_sample("samples/monsterkill.wav")))
-    	return 0;
+    if(!(samples[5] = al_load_sample("Samples/monsterkill.wav")))
+        return 0;
 
-  	if(!(samples[6] = al_load_sample("samples/unstoppable.wav")))
-    	return 0;
+    if(!(samples[6] = al_load_sample("Samples/unstoppable.wav")))
+        return 0;
 
-  	if(!(samples[7] = al_load_sample("samples/multikill.wav")))
-    	return 0;
+    if(!(samples[7] = al_load_sample("Samples/multikill.wav")))
+        return 0;
 
-  	if(!(samples[8] = al_load_sample("samples/ultrakill.wav")))
-    	return 0;
+    if(!(samples[8] = al_load_sample("Samples/ultrakill.wav")))
+        return 0;
 
-  	if(!(samples[9] = al_load_sample("samples/godlike.wav")))
-    	return 0;
+    if(!(samples[9] = al_load_sample("Samples/godlike.wav")))
+        return 0;
 
-  	if(!(samples[10] = al_load_sample("samples/holyshit.wav")))
-    	return 0;
+    if(!(samples[10] = al_load_sample("Samples/holyshit.wav")))
+        return 0;
 
-  	/*if(!(samples[11] = al_load_sample("samples/fatality.wav")))
-    	return 0;
+    /*if(!(samples[11] = al_load_sample("samples/fatality.wav")))
+        return 0;
 
-  	if(!(samples[12] = al_load_sample("samples/finish.wav")))
-    	return 0;*/
+    if(!(samples[12] = al_load_sample("samples/finish.wav")))
+        return 0;*/
 
   return 1;
  }
 
 int vitoria_jogador(int jogada, int jogada_npc){
-  	if(jogada_npc == 0 && (jogada == 1 || jogada == 4))
-    	return 1;
-  	else if(jogada_npc == 1 && (jogada == 2 || jogada == 3))
-    	return 1;
-  	else if(jogada_npc == 2 && (jogada == 0 || jogada == 4))
-    	return 1;
-  	else if(jogada_npc == 3 && (jogada == 0 || jogada == 2))
-    	return 1;
-  	else if(jogada_npc == 4 && (jogada == 1 || jogada == 3))
-    	return 1;
+    if(jogada_npc == 0 && (jogada == 1 || jogada == 4))
+        return 1;
+    else if(jogada_npc == 1 && (jogada == 2 || jogada == 3))
+        return 1;
+    else if(jogada_npc == 2 && (jogada == 0 || jogada == 4))
+        return 1;
+    else if(jogada_npc == 3 && (jogada == 0 || jogada == 2))
+        return 1;
+    else if(jogada_npc == 4 && (jogada == 1 || jogada == 3))
+        return 1;
   
-  	return 0;
+    return 0;
 }
 
 void jogada_invalida(game *g){
-	int rodada = g->rodada - 1;
+    int rodada = g->rodada - 1;
 
-	g->resultado[rodada] = 0;
+    g->resultado[rodada] = 0;
 
-	adiciona_jogada(g->p, rodada, -1);
+    adiciona_jogada(g->p, rodada, -1);
 
-	adiciona_jogada(g->npc, rodada, -1);
-	
-	adiciona_vitoria(g->npc);
+    adiciona_jogada(g->npc, rodada, -1);
+    
+    adiciona_vitoria(g->npc);
 
-	g->rodada++;
+    g->rodada++;
 }
 
-void game_loop(){
+void imprime_mao(rastreador *r, ALLEGRO_BITMAP *mao, int altura, int largura){
+  int cx = al_get_bitmap_width(mao)/2;
+  int cy = al_get_bitmap_height(mao);
+
+  float angulo = ((r->angulo)*PI)/180;
+
+  al_draw_rotated_bitmap(mao, cx, cy, (largura - cy)/2, altura/2, angulo, 0);
+}
+
+void game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_TELA, ALLEGRO_FONT *fonte, 
+	ALLEGRO_BITMAP *fundo, ALLEGRO_TIMER *timer_jogo, ALLEGRO_EVENT_QUEUE *fila_eventos)
+{
 	game *g = inicializa_game();
-	srand(time(NULL));
 
-	camera *cam = camera_inicializa(1);
-	if(!cam)
-    erro("nao foi possivel inicializar camera");
+    srand(time(NULL));
 
-  	int largura = cam->largura;
-  	int altura = cam->altura;
+    camera *cam = camera_inicializa(0);
+    if(!cam)
+        erro("nao foi possivel inicializar camera");
 
-  	inicializa();
+    int largura = cam->largura;
+    int altura = cam->altura;
 
-  	ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
-  	if(!queue)
-    	erro("nao foi possivel criar fila de eventos");
+    ALLEGRO_SAMPLE *samples[13];
+    if(!aloca_samples(samples))
+        erro("nao foi possivel carregar samples");
 
-  	ALLEGRO_DISPLAY *display = al_create_display(largura, altura);
-  	if(!display)
-    	erro("nao foi possivel criar janela");
+    rastreador *r = aloca_rastreador(altura, largura);
 
- 	  al_register_event_source(queue, al_get_display_event_source(display));
+    parametros *p = aloca_parametros();
 
-  	ALLEGRO_FONT *fonte = al_load_font("unifont.ttf", 40, 0);
-  	if(!fonte)
-    	erro("nao foi possivel carregar fonte");
+    ALLEGRO_BITMAP *mao = al_load_bitmap("Bitmaps/rock.png");
 
-  	/*ALLEGRO_AUDIO_STREAM *musicas[1];
-  	if(!aloca_musicas(musicas))
-    	erro("nao foi possivel carregar musicas");*/
-
-  	ALLEGRO_SAMPLE *samples[13];
-  	if(!aloca_samples(samples))
-    	erro("nao foi possivel carregar samples");
-
-  	ALLEGRO_TIMER *timer = al_create_timer(1.0 / FPS);
-  	if(!timer)
-    	erro("nao foi possivel criar relogio");
-
-  	al_register_event_source(queue, al_get_timer_event_source(timer));
-
-  	ALLEGRO_COLOR cor = al_map_rgb_f(0, 0, 1);
-
-  	ALLEGRO_BITMAP *buffer = al_get_backbuffer(display);
-
-  	ALLEGRO_BITMAP *tela = al_create_sub_bitmap(buffer, 0, 0, largura, altura);
-
-  	unsigned char ***matriz = camera_aloca_matriz(cam);
-
-  	rastreador *r = aloca_rastreador(altura, largura);
+    unsigned char ***matriz = camera_aloca_matriz(cam);
 
     hsv **h = hsv_aloca(altura, largura);
 
-  	parametros *p = aloca_parametros();
+    int sequencia_sample, ultima_vitoria;
 
- 	  /**********/
+    if(!calibragem(p, r, h, cam, janela, fonte, ALTURA_TELA, LARGURA_TELA))
+        erro("existe muito ruido no local!\n");
 
- 	  printf("x: %d y: %d\n", largura, altura);
+    for(sequencia_sample = 1; sequencia_sample < 2; sequencia_sample++){
+        al_play_sample(samples[sequencia_sample], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 
-  	//calibragem(p, r, matriz, cam);
+        int length = al_get_sample_length(samples[sequencia_sample]); // ganbis provisoria;
 
-  	al_start_timer(timer);
+        delay(length/25);
+    }
 
-  	int sequencia_sample, ultima_vitoria;
+    bool sair = false;
+    int tecla = 0; 
+    int	min_jogo = 2, seg_jogo = 0, seg_rodada = 5;
 
-  	/*al_attach_audio_stream_to_mixer(musicas[0], al_get_default_mixer());
-  	al_set_audio_stream_playing(musicas[0], 0);*/
+    al_start_timer(timer_jogo);
 
-  	for(sequencia_sample = 1; sequencia_sample < 2; sequencia_sample++){
-    	al_play_sample(samples[sequencia_sample], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+    while (!sair)
+    {
+        while(!al_is_event_queue_empty(fila_eventos))
+        {
+            ALLEGRO_EVENT evento;
+            al_wait_for_event(fila_eventos, &evento);
+ 
+            if (evento.type == ALLEGRO_EVENT_KEY_DOWN)
+            {
+                switch(evento.keyboard.keycode)
+                {
+                	case ALLEGRO_KEY_1:
+                    	tecla = 1;
+                    	break;
+                	case ALLEGRO_KEY_2:
+                    	tecla = 2;
+                    	break;
+                	case ALLEGRO_KEY_3:
+                    	tecla = 3;
+                    	break;
+                }
+            }
+            else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            {
+                return;
+            }
 
-    	int length = al_get_sample_length(samples[sequencia_sample]); // ganbis provisoria;
+            if (evento.type == ALLEGRO_EVENT_TIMER)
+            {
+            	if (evento.timer.source == timer_jogo)
+            	{
+            		if (min_jogo == 0 && seg_jogo <= 1) 
+        			{
+        				sair = true;
+        			}
 
-    	delay(length/25);
-  	}
+            		seg_jogo--;
+            		if (seg_jogo <= 0)
+            		{
+            			min_jogo--;
+            			seg_jogo = 59;
+            		}
+       
+            		seg_rodada--;
+            		if (seg_rodada == 0)
+            		{
+            			seg_rodada = 5;
+            			g->rodada++;
+            		}
+            	}
+            }
+        }
 
-  	printf("passou\n");
+        al_draw_bitmap(fundo, 0, 0, 0);
 
-  	//al_set_audio_stream_playing(musicas[0], 1);
+        al_draw_textf(fonte, al_map_rgb(255, 255, 255), (LARGURA_TELA / 2), 15, 
+				ALLEGRO_ALIGN_CENTRE, "%dm %ds", min_jogo, seg_jogo);
+		al_draw_textf(fonte, al_map_rgb(255, 255, 255), (LARGURA_TELA / 2), 55, 
+				ALLEGRO_ALIGN_CENTRE, "%ds", seg_rodada);
 
-  	/**********/
+        al_draw_textf(fonte, al_map_rgb(255, 255, 255), 10, 10, 
+                	ALLEGRO_ALIGN_LEFT, "Rodada: %d", g->rodada + 1);
 
-  	while(g->continuar){
-  		char aux = g->npc->vitoria + 48;
+		al_draw_textf(fonte,al_map_rgb(255, 255, 255), LARGURA_TELA - 30, 10, 
+                	ALLEGRO_ALIGN_RIGHT, "Jogador: %d", g->p->vitoria);
 
-  		al_draw_text(fonte, cor, 100, 100, 0, &aux);
+		al_draw_textf(fonte, al_map_rgb(255, 255, 255), LARGURA_TELA - 30, 50, 
+                	ALLEGRO_ALIGN_RIGHT, "NPC: %d", g->npc->vitoria);
 
-  		aux = g->rodada + 48;
+        atualiza_angulo(r);
 
-  		al_draw_text(fonte, cor, 300,100, 0, &aux);
+        imprime_mao(r, mao, ALTURA_TELA, LARGURA_TELA);
 
-  		aux = g->p->vitoria + 48;
+        if(g->fase == 1){
+            if(!contador(r)){
+                camera_atualiza(cam);
 
-  		al_draw_text(fonte, cor, 500, 100, 0, &aux);
+                rgb_hsv(r, cam->quadro, h);
 
-  		al_flip_display();
+                erosao_mao(r, p, h, 3, 3);
 
-  		ALLEGRO_EVENT event;
+                dilatacao_mao(r, p, h, 3, 3);
 
-    	al_wait_for_event(queue, &event);
+                atualiza_rastreador(r, p, h);
+            }
 
-    	if(g->rodada < 11){
-			    if(g->fase == 1){
-	        	if(!contador(r)){
-	          		camera_atualiza(cam);
+            else
+                g->fase = 2;
 
-                copia_quadro(matriz, cam->quadro, altura, largura);
+        }
+
+        /**********/
+
+        else if(g->fase == 2){
+            camera_atualiza(cam);
+
+            copia_quadro(matriz, cam->quadro, r->altura, r->largura);
+
+            camera_atualiza(cam);
+
+            if(detecta_movimento(r, matriz, cam->quadro)){
+                copia_quadro(matriz, cam->quadro, r->altura, r->largura);
 
                 rgb_hsv(r, cam->quadro, h);
 
@@ -245,170 +273,329 @@ void game_loop(){
 
                 atualiza_rastreador(r, p, h);
 
-                black_white(r, p, h, matriz);
+                camera_atualiza(cam);
 
-                camera_copia(cam, matriz, tela);
+                if(r->flag_descendo){
+                    printf("Era pra ter jogado e sua mão voltou a subir!\n");
+                    //buzina
+                    jogada_invalida(g);
+                    g->fase = 1;
+                }    
+            }
 
-	          		al_draw_rectangle(r->w,r->n,r->e,r->s,cor,1);
+            else{
+                g->fase = 3;
+            }
+        }
 
-	          		if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-	            		g->continuar = 0;
-	        	}
+            /**********/
 
-	        	else
-	          		g->fase = 2;
-	      	}
+        else if(g->fase == 3){
 
-	      	/**********/
+            //inicio do RTA
 
-	      	else if(g->fase == 2){
-	        	camera_atualiza(cam);
+            hsv **h_aux = hsv_aloca(altura, largura);
 
-	        	copia_quadro(matriz, cam->quadro, r->altura, r->largura);
+            camera_atualiza(cam);
 
-	        	camera_atualiza(cam);
+            rgb_hsv(r, cam->quadro, h);
 
-	        	if(detecta_movimento(r, matriz, cam->quadro)){
-	          		copia_quadro(matriz, cam->quadro, r->altura, r->largura);
+            camera_atualiza(cam);
 
-	          		camera_copia(cam, matriz, tela);
+            rgb_hsv(r, cam->quadro, h_aux);
 
-	          		rgb_hsv(r, cam->quadro, h);
+            merge(r, p, h, h_aux);
 
-                erosao_mao(r, p, h, 1, 3);
+            camera_atualiza(cam);
 
-                dilatacao_mao(r, p, h, 3, 5);
+            rgb_hsv(r, cam->quadro, h_aux);
 
-                atualiza_rastreador(r, p, h);
+            merge(r, p, h, h_aux);
 
-	          		al_draw_rectangle(r->w,r->n,r->e,r->s,cor,1);
+            hsv_libera(h_aux, altura);
 
-	          		camera_atualiza(cam);
+            //inicio do RTA
 
-	          		if(r->flag_descendo){
-	            		printf("Era pra ter jogado e sua mão voltou a subir!\n");
-	            		//buzina
-	            		jogada_invalida(g);
-	            		g->fase = 1;
-	          		}    
-	        	}
+            int rodada = g->rodada - 1;
 
-	        	else{
-	          		g->fase = 3;
-	        	}
-	      	}
+            int jogada_player = analiza_jogada(r, p, h);
 
-	      	/**********/
+            adiciona_jogada(g->p, rodada, jogada_player);
 
-	      	else if(g->fase == 3){
-	      		int rodada = g->rodada - 1;
+            if(jogada_player == -1){
+                printf("jogada invalida!\n");
+                //buzina
+                jogada_invalida(g);
+            }
 
-	        	int jogada_player = analiza_jogada(r, p, h);
+            else{
+                printf("Você jogou: ");
 
-            black_white_finger(r, p, h, matriz);
+                imprime_jogada(jogada_player);
 
-	        	adiciona_jogada(g->p, rodada, jogada_player);
+                int jogada_npc = 0; //rand() % 5;
 
-	        	camera_copia(cam, matriz, tela);
+                adiciona_jogada(g->npc, rodada, jogada_npc);
 
-	        	al_flip_display();
+                printf("jogada do npc: ", jogada_npc);
 
-	        	delay(2000);
+                imprime_jogada(jogada_npc);
 
-	        	if(jogada_player == -1){
-	          		printf("jogada invalida!\n");
-	          		//buzina
-	          		jogada_invalida(g);
-	        	}
+                if(jogada_player == jogada_npc){
+                    printf("Empatou!\n");
+                    g->resultado[rodada] = 2;
+                }
 
-	        	else{
-	          		printf("Você jogou: ");
+                else{
+                    g->resultado[rodada] = vitoria_jogador(jogada_player, jogada_npc);
 
-	          		imprime_jogada(jogada_player);
+                    if(g->resultado[rodada] == 1){// vitoria do jogador
+                        printf("você venceu!\n");
+                        adiciona_vitoria(g->p);
+                    }
 
-	          		int jogada_npc = 0; //rand() % 5;
+                    else{
+                        printf("Você perdeu!\n");
+                        adiciona_vitoria(g->npc);
+                    }
 
-	          		adiciona_jogada(g->npc, rodada, jogada_npc);
+                    if(sequencia_sample == 2){
+                        sequencia_sample++;
+                        ultima_vitoria = g->resultado[rodada];
+                    }
 
-	          		printf("jogada do npc: ", jogada_npc);
+                    else{
+                        if(ultima_vitoria == g->resultado[rodada]){
+                            al_play_sample(samples[sequencia_sample], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                            if(sequencia_sample <= 10)
+                                sequencia_sample++;
+                            
+                        }
+                        else
+                            sequencia_sample = 3;
+                    }
+                }
+            }
 
-	          		imprime_jogada(jogada_npc);
+            g->fase = 1;
+            g->rodada++;
+        }
+ 
+        al_flip_display();
+    }
+}
 
-	          		if(jogada_player == jogada_npc){
-	            		printf("Empatou!\n");
-	            		g->resultado[rodada] = 2;
-	            	}
+int game_tutorial(const int LARGURA_TELA, const int ALTURA_TELA, ALLEGRO_EVENT_QUEUE *fila_eventos,
+	ALLEGRO_BITMAP *fundo, ALLEGRO_BITMAP *botao_voltar, ALLEGRO_BITMAP *tutorial, ALLEGRO_DISPLAY *janela, ALLEGRO_BITMAP *tesoura,
+	ALLEGRO_BITMAP *spock, ALLEGRO_BITMAP *papel, ALLEGRO_BITMAP *lagarto, ALLEGRO_BITMAP *pedra, ALLEGRO_FONT *fonte)
+{
+	bool sair = false;
+	int flag;
 
-	          		else{
-	            		g->resultado[rodada] = vitoria_jogador(jogada_player, jogada_npc);
+	while(!sair)
+    {
+    	while (!al_is_event_queue_empty(fila_eventos))
+    	{
+			ALLEGRO_EVENT evento;
+			al_wait_for_event(fila_eventos, &evento);
+ 
+			// Se o evento foi de movimentação do mouse
+			if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
+			{
+				   if (evento.mouse.x >= 130 - al_get_bitmap_width(botao_voltar) / 2 &&
+				       evento.mouse.x <= 130 + al_get_bitmap_width(botao_voltar) / 2 &&
+				       evento.mouse.y >= 50 - al_get_bitmap_height(botao_voltar) / 2 &&
+				       evento.mouse.y <= 50 + al_get_bitmap_height(botao_voltar) / 2)
+				   {
+				   		al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+				   }
+				   else if (evento.mouse.x >= (LARGURA_TELA / 2) - 130 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) -130 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 400 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 400 + 270)
+                	{
+            			al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+                	}
+                	else if (evento.mouse.x >= (LARGURA_TELA / 2) - 450 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) - 450 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 220 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 220 + 270)
+                	{
+            			al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+                	}
+                	else if (evento.mouse.x >= (LARGURA_TELA / 2) + 200 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) + 200 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 220 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 220 + 270)
+                	{
+            			al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+                	}
+                	else if (evento.mouse.x >= (LARGURA_TELA / 2) + 120 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) + 120 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) + 95 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) + 95 + 270)
+                	{
+            			al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+                	}
+                	else if (evento.mouse.x >= (LARGURA_TELA / 2) - 350 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) - 350 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) + 95 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) + 95 + 270)
+                	{
+            			al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+                	}
+				   else
+				     	al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
+			}
+			// Ou se o evento foi um clique do mouse
+			else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+         	{
+                if (evento.mouse.x >= 130 - al_get_bitmap_width(botao_voltar) / 2 &&
+                    evento.mouse.x <= 130 + al_get_bitmap_width(botao_voltar) / 2 &&
+                    evento.mouse.y >= 50 - al_get_bitmap_height(botao_voltar) / 2 &&
+                    evento.mouse.y <= 50 + al_get_bitmap_height(botao_voltar) / 2)
+                {
+                	sair = true;
+                }
+                else if (evento.mouse.x >= (LARGURA_TELA / 2) - 130 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) -130 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 400 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 400 + 270)
+                	{
+            			flag = ganhade(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, tesoura, lagarto, papel, spock, janela, fonte);
+            			if (flag == -1)
+            			{
+            				return -1;
+            			}
+                	}
+                else if (evento.mouse.x >= (LARGURA_TELA / 2) - 450 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) - 450 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 220 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 220 + 270)
+                	{
+            			flag = ganhade(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, pedra, tesoura, papel, lagarto, janela, fonte);
+            			if (flag == -1)
+            			{
+            				return -1;
+            			}
+                	}
+                else if (evento.mouse.x >= (LARGURA_TELA / 2) + 200 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) + 200 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) - 220 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) - 220 + 270)
+                	{
+            			flag = ganhade(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, pedra, spock, tesoura, lagarto, janela, fonte);
+            			if (flag == -1)
+            			{
+            				return -1;
+            			}
+                	}
+                else if (evento.mouse.x >= (LARGURA_TELA / 2) + 120 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) + 120 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) + 95 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) + 95 + 270)
+                	{
+            			flag = ganhade(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, papel, lagarto, pedra, spock, janela, fonte);
+            			if (flag == -1)
+            			{
+            				return -1;
+            			}
+                	}
+                else if (evento.mouse.x >= (LARGURA_TELA / 2) - 350 &&
+                    evento.mouse.x <= (LARGURA_TELA / 2) - 350 + 220 &&
+                    evento.mouse.y >= (ALTURA_TELA / 2) + 95 &&
+                    evento.mouse.y <= (ALTURA_TELA / 2) + 95 + 270)
+                	{
+            			flag = ganhade(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, papel, spock, tesoura, pedra, janela, fonte);
+            			if (flag == -1)
+            			{
+            				return -1;
+            			}
+                	}
+        	}
+        	else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            {
+                return -1;
+            }                	
+        }
 
-	            		if(g->resultado[rodada] == 1){// vitoria do jogador
-	              			printf("você venceu!\n");
-	              			adiciona_vitoria(g->p);
-	            		}
+        al_draw_bitmap(fundo, 0, 0, 0);
 
-	            		else{
-	              			printf("Você perdeu!\n");
-	              			adiciona_vitoria(g->npc);
-	            		}
+        al_draw_bitmap(tutorial, 0, 0, 0);
 
-	            		if(sequencia_sample == 2){
-	              			sequencia_sample++;
-	              			ultima_vitoria = g->resultado[rodada];
-	            		}
+       	al_draw_bitmap(botao_voltar,130 - al_get_bitmap_width(botao_voltar) / 2,
+                50 - al_get_bitmap_height(botao_voltar) / 2, 0);
 
-	            		else{
-	              			if(ultima_vitoria == g->resultado[rodada]){
-	                			al_play_sample(samples[sequencia_sample], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-	                			if(sequencia_sample <= 10)
-	                				sequencia_sample++;
-	              			}
-	              			else
-	                			sequencia_sample = 3;
-	            		}
-	          		}
-	        	}
+        al_flip_display();
+    }
+    return 0;
+}
 
-	        	g->fase = 1;
-	        	g->rodada++;
-      		}
-		}
-	}
+int ganhade(const int LARGURA_TELA, const int ALTURA_TELA, ALLEGRO_EVENT_QUEUE *fila_eventos,
+	ALLEGRO_BITMAP *fundo, ALLEGRO_BITMAP *botao_voltar, ALLEGRO_BITMAP *ganha1, ALLEGRO_BITMAP *ganha2, ALLEGRO_BITMAP *perde1, 
+	ALLEGRO_BITMAP *perde2, ALLEGRO_DISPLAY *janela, ALLEGRO_FONT *fonte)
+{
+	bool sair = false;
 
-	if(g->continuar){
-		if(g->p->vitoria > g->npc->vitoria)
-			printf("Você venceu!\n");
-		else if(g->p->vitoria == g->npc->vitoria)
-			printf("Empatou!\n");
-		else
-			printf("Voce perdeu!\n");
-	}
+	while(!sair)
+    {
+    	while (!al_is_event_queue_empty(fila_eventos))
+    	{
+			ALLEGRO_EVENT evento;
+			al_wait_for_event(fila_eventos, &evento);
+ 
+			// Se o evento foi de movimentação do mouse
+			if (evento.type == ALLEGRO_EVENT_MOUSE_AXES)
+			{
+				   if (evento.mouse.x >= 130 - al_get_bitmap_width(botao_voltar) / 2 &&
+				       evento.mouse.x <= 130 + al_get_bitmap_width(botao_voltar) / 2 &&
+				       evento.mouse.y >= 50 - al_get_bitmap_height(botao_voltar) / 2 &&
+				       evento.mouse.y <= 50 + al_get_bitmap_height(botao_voltar) / 2)
+				   {
+				   		al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_LINK);
+				   }
+				   else
+				     	al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT);
+			}
+			// Ou se o evento foi um clique do mouse
+			else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+         	{
+                if (evento.mouse.x >= 130 - al_get_bitmap_width(botao_voltar) / 2 &&
+                    evento.mouse.x <= 130 + al_get_bitmap_width(botao_voltar) / 2 &&
+                    evento.mouse.y >= 50 - al_get_bitmap_height(botao_voltar) / 2 &&
+                    evento.mouse.y <= 50 + al_get_bitmap_height(botao_voltar) / 2)
+                {
+                	sair = true;
+                }
+        	} 
+        	else if (evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+            {
+                return -1;
+            }               	
+        }
 
-	al_stop_timer(timer);
+        al_draw_bitmap(fundo, 0, 0, 0);
 
-  /**********/
+       
+        al_draw_textf(fonte, al_map_rgb(0, 0, 0), (LARGURA_TELA / 2) - 400, (ALTURA_TELA / 2) - 300, 
+               ALLEGRO_ALIGN_CENTRE, "Ganha de:");
+        al_draw_bitmap(ganha1, (LARGURA_TELA / 2) - 400,
+              (ALTURA_TELA / 2) - 200, 0);
+        al_draw_bitmap(ganha2, (LARGURA_TELA / 2) - 400,
+              (ALTURA_TELA / 2) + 50, 0); 
+        al_draw_textf(fonte, al_map_rgb(0, 0, 0), (LARGURA_TELA / 2) + 400, (ALTURA_TELA / 2) - 300, 
+               ALLEGRO_ALIGN_CENTRE, "Perde de:");
+        al_draw_bitmap(perde1, (LARGURA_TELA / 2) + 400,
+              (ALTURA_TELA / 2) - 200, 0);
+        al_draw_bitmap(perde2, (LARGURA_TELA / 2) + 400,
+              (ALTURA_TELA / 2) + 50, 0); 
 
-  	al_destroy_bitmap(tela);
+        
 
-  	camera_libera_matriz(cam, matriz);
+       	al_draw_bitmap(botao_voltar, 130 - al_get_bitmap_width(botao_voltar) / 2,
+                50 - al_get_bitmap_height(botao_voltar) / 2, 0);
 
-  	/**********/
-
-  	al_unregister_event_source(queue, al_get_timer_event_source(timer));
-  	al_destroy_timer(timer);
-
-  	al_unregister_event_source(queue, al_get_display_event_source(display));
-  	al_destroy_display(display);
-
-  	al_destroy_font(fonte);
-
-  	al_destroy_event_queue(queue);
-  	al_shutdown_primitives_addon();
-  	al_uninstall_system();
-
-  	camera_finaliza(cam);
-
-  	libera_rastreador(r);
-
-  	libera_parametros(p);
+        al_flip_display();
+    }
+    return 0;
 }

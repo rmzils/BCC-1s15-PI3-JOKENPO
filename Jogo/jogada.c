@@ -13,15 +13,23 @@ void sort(int conjuntos[], int quantidade){
 int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 	disjoint *d = aloca_disjoint(200);
 
-	erosao_mao(r, p, h, 3, 3);
+	erosao_mao(r, p, h, 1, 3);
 
     dilatacao_mao(r, p, h, 3, 5);
 
-	dilatacao_dedo(r, p, h, 3, 3);
+    erosao_dedo(r, p, h, 1, 3);
+
+    dilatacao_dedo(r, p, h, 1, 5);
+
+    erosao_dedo(r, p, h, 1, 5);
+
+	erosao_dedo(r, p, h, 1, 5);
+
+	dilatacao_dedo(r, p, h, 1, 5);
 
 	connected_components(r, p, h, d);
 
-	consiste_dedo(r, p, d);
+	consiste_dedo(d);
 
 	int quantidade = conta_componentes(d);
 

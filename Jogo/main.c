@@ -1,7 +1,9 @@
 #include "game.h"
+#include "menu.h"
 
 int main(void){
-	game_loop();
+	
+	menu();
 
 	return 0;
 }

@@ -16,6 +16,11 @@ rastreador *aloca_rastreador(int altura, int largura){
 
 	r->flag_descendo = 0;
 
+	r->altura_max = altura;
+	r->altura_min = 0;
+
+	r->angulo = 0;
+
 	return r;
 }
 
@@ -129,6 +134,19 @@ void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 		if(centro_mao < r->delimitador)
 			r->flag_descendo = 1;
 	}
+}
+
+void atualiza_angulo(rastreador *r){
+	int centro_mao = (r->s - r->n)/2 + r->n;
+
+	if(centro_mao > r->altura_min){
+		r->angulo = 90;
+		return;
+	}
+
+	r->angulo = ((70*centro_mao)/r->altura_min) + 20;
+
+	printf("%d\n", r->angulo);
 }
 
 int contador(rastreador *r){

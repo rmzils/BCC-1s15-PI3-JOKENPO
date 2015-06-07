@@ -126,6 +126,115 @@ void connected_components(rastreador *r, parametros *p, hsv **h, disjoint *d){
 	une_conjuntos(d);
 }
 
+void connected_components_mao(rastreador *r, parametros *p, hsv **h, disjoint *d){
+	pixel matriz_p[r->s][r->e];
+
+	for(int i = r->n; i < r->s; i++){
+		for(int  j = r->w; j < r->e; j++){
+			if(pixel_mao(p, &h[i][j])){
+				int menor;
+				conjunto *c = NULL;
+
+				if(j > r->w && pixel_mao(p, &h[i][j -1])){
+					if(c == NULL){
+						c = find(&matriz_p[i][j - 1]);
+						menor = c->num;
+					}
+					else{
+						c = find(&matriz_p[i][j - 1]);
+						if(d->conjuntos[menor] != c){
+							if(c->num < menor){
+								c = find(&matriz_p[i][j - 1]);
+								if(!parentesco(c,d->conjuntos[menor]))
+									insere_parente(c,d->conjuntos[menor]);
+								menor = c->num;
+							}
+							else{
+								if(!parentesco(d->conjuntos[menor],c))
+									insere_parente(d->conjuntos[menor],c);
+							}
+						}
+					}
+				}
+
+				if(i > r->n && j > r->w && pixel_mao(p, &h[i - 1][j - 1])){
+					if(c == NULL){
+						c = find(&matriz_p[i - 1][j - 1]);
+						menor = c->num;
+					}
+					else{
+						c = find(&matriz_p[i - 1][j - 1]);
+						if(d->conjuntos[menor] != c){
+							if(c->num < menor){
+								if(!parentesco(c,d->conjuntos[menor]))
+									insere_parente(c,d->conjuntos[menor]);
+								menor = c->num;
+							}
+							else{
+								if(!parentesco(d->conjuntos[menor],c))
+									insere_parente(d->conjuntos[menor],c);
+							}
+						}
+					}
+				}
+
+				if(i > r->n && pixel_mao(p, &h[i - 1][j])){
+					if(c == NULL){
+						c = find(&matriz_p[i - 1][j]);
+						menor = c->num;
+					}
+					else{
+						c = find(&matriz_p[i - 1][j]);
+						if(d->conjuntos[menor] != c){
+							if(c->num < menor){
+								if(!parentesco(c,d->conjuntos[menor]))
+									insere_parente(c,d->conjuntos[menor]);
+								menor = c->num;
+							}
+							else{
+								if(!parentesco(d->conjuntos[menor],c))
+									insere_parente(d->conjuntos[menor],c);
+							}
+						}
+					}
+				}
+
+				if(i > r->n && j < r->e - 1 && pixel_mao(p, &h[i - 1][j + 1])){
+					if(c == NULL){
+						c = find(&matriz_p[i - 1][j + 1]);
+						menor = c->num;
+					}
+					else{
+						c = find(&matriz_p[i - 1][j + 1]);
+						if(d->conjuntos[menor] != c){
+							if(c->num < menor){
+								if(!parentesco(c,d->conjuntos[menor]))
+									insere_parente(c,d->conjuntos[menor]);
+								menor = c->num;
+							}
+							else{
+								if(!parentesco(d->conjuntos[menor],c))
+									insere_parente(d->conjuntos[menor],c);
+							}
+						}
+					}
+				}
+
+				if(c == NULL){
+					menor = d->n;
+					insere_conjunto(d);
+				}
+					
+				adiciona_massa(d->conjuntos[menor]);
+
+				matriz_p[i][j].representante = d->conjuntos[menor];
+			}
+		}
+	}
+
+	une_conjuntos(d);
+}
+
 void une_conjuntos(disjoint *d){
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
@@ -136,9 +245,7 @@ void une_conjuntos(disjoint *d){
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
 		if(c->visitado == 0){
-			printf("chamou a funcao para o conjunto %d: ", c->num);
 			une_parentes(d, c);	
-			printf("\n");
 		}
 	}
 }
@@ -162,7 +269,6 @@ void une_parentes(disjoint *d, conjunto *c){
 			conjunto *w = topo->a->w;
 
 			if(w->visitado == 0){
-				printf(" %d", w->num);
 				massa_total += w->massa;
 				w->massa = 0;
 
@@ -180,8 +286,6 @@ void une_parentes(disjoint *d, conjunto *c){
 	c->massa = massa_total;
 
 	pilha_libera(p);
-
-	printf("\n");
 }
 
 conjunto *find(pixel *p){
@@ -193,18 +297,19 @@ int conta_componentes(disjoint *d){
 
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
-		printf("%d massa: %d\n", c->num, c->massa);
 		if(c->massa > 0)
 			n++;
 	}
 
+	printf("numero de componentes: %d\n", n);
+
 	return n;
 }
 
-void consiste_dedo(rastreador *r, parametros *p, disjoint *d){
+void consiste_dedo(disjoint *d){
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
-		if((c->massa < p->massa_min/2) || !c->dedo)
+		if(!c->dedo)
 			c->massa = 0;
 	}
 }

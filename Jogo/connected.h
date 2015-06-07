@@ -13,11 +13,12 @@ typedef struct{
 }pixel;
 
 void connected_components(rastreador *r, parametros *p, hsv **h, disjoint *d);
+void connected_components_mao(rastreador *r, parametros *p, hsv **h, disjoint *d);
 void une_conjuntos(disjoint *d);
 void une_parentes(disjoint *d, conjunto *c);
 conjunto *find(pixel *p);
 int conta_componentes(disjoint *d);
-void consiste_dedo(rastreador *r, parametros *p, disjoint *d);
+void consiste_dedo(disjoint *d);
 void imprime_parentes(conjunto *c);
 
 

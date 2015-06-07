@@ -77,7 +77,7 @@ void rgb_hsv(rastreador *rast, unsigned char ***matriz, hsv **h){
 void black_white(rastreador *r, parametros *p, hsv **h, unsigned char ***matriz){
 	for(int i = r->n; i < r->s; i++){
 		for(int j = r->w; j < r->e; j++){
-			if(h[i][j].matiz >= p->matiz_mao_min && h[i][j].matiz <= p->matiz_mao_max && h[i][j].saturacao >= p->saturacao_mao){
+			if(pixel_mao(p, &h[i][j])){
 				//printf("matiz: %d saturacao: %d\n", matiz[i][j], saturacao[i][j]);
 				matriz[i][j][0] = 255;
 				matriz[i][j][1] = 255;
@@ -96,7 +96,7 @@ void black_white(rastreador *r, parametros *p, hsv **h, unsigned char ***matriz)
 void black_white_finger(rastreador *r, parametros *p, hsv **h, unsigned char ***matriz){
 	for(int i = r->n; i < r->s; i++){
 		for(int j = r->w; j < r->e; j++){
-			if(h[i][j].matiz >= p->matiz_dedo_min && h[i][j].matiz <= p->matiz_dedo_max && h[i][j].saturacao >= p->saturacao_dedo){
+			if(pixel_dedo(p, &h[i][j])){
 				//printf("matiz: %d saturacao: %d\n", matiz[i][j], saturacao[i][j]);
 				matriz[i][j][0] = 255;
 				matriz[i][j][1] = 255;
@@ -109,6 +109,18 @@ void black_white_finger(rastreador *r, parametros *p, hsv **h, unsigned char ***
 				matriz[i][j][2] = 0;
 			}
 		}	
+	}
+}
+
+void merge(rastreador *r, parametros *p, hsv **h, hsv **h_aux){
+	for(int i = r->n; i < r->s; i++){
+		for(int j = r->w; j < r->e; j++){
+			if(!pixel_dedo(p, &h[i][j]) && pixel_dedo(p, &h_aux[i][j])){
+				h[i][j].matiz == h_aux[i][j].matiz;
+				h[i][j].saturacao == h_aux[i][j].saturacao;
+				h[i][j].iluminacao == h_aux[i][j].iluminacao;
+			}
+		}
 	}
 }
 
@@ -137,6 +149,11 @@ void dilatacao_mao(rastreador *r, parametros *p, hsv **h, int n, int k){
 void erosao_mao(rastreador *r, parametros *p, hsv **h, int n, int k){
 	for(int i = 0; i < n; i++)
 		erosao_mao_int(r, p, h, k);
+}
+
+void erosao_dedo(rastreador *r, parametros *p, hsv **h, int n, int k){
+	for(int i = 0; i < n; i++)
+		erosao_dedo_int(r, p, h, k);
 }
 
 void dilatacao_dedo_int(rastreador *r, parametros *p, hsv **h, int k){
@@ -241,6 +258,40 @@ void erosao_mao_int(rastreador *r, parametros *p, hsv **h, int k){
 	}
 }
 
+void erosao_dedo_int(rastreador *r, parametros *p, hsv **h, int k){
+	hsv h_aux[r->s][r->e];
+
+	k = (float)(((k - 1)/2)+0.5);
+
+	for(int i = r->n; i < r->s; i++){
+		for(int j = r->w; j < r->e; j++){
+			h_aux[i][j].matiz = h[i][j].matiz;
+			h_aux[i][j].saturacao = h[i][j].saturacao;
+			h_aux[i][j].iluminacao = h[i][j].iluminacao;
+
+			if(pixel_dedo(p, &h[i][j])){
+				for(int x = i - k; x <= i + k; x++){
+					for(int y = j - k; y <= j + k; y++){
+						if((x >= 0 && x < r->s) && (y >= 0 && y < r->e) && !pixel_dedo(p, &h[x][y])){
+							h_aux[i][j].matiz = 0;
+							h_aux[i][j].saturacao = 0;
+							h_aux[i][j].iluminacao = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for(int i = r->n; i < r->s; i++){
+		for(int j = r->w; j < r->e; j++){
+			h[i][j].matiz = h_aux[i][j].matiz;
+			h[i][j].saturacao = h_aux[i][j].saturacao;
+			h[i][j].iluminacao = h_aux[i][j].iluminacao;
+		}
+	}
+}
+
 void blur_simples(rastreador *r, unsigned char ***matriz, int k){
 	int matriz_aux[r->s][r->e][3];
 
@@ -304,10 +355,9 @@ void fritacao(rastreador *r, unsigned char ***matriz, int k){
 	}
 }
 
-void hsv_libera(rastreador *r, hsv **h){
-	for(int i = 0; i < r->s; i++){
-		free(h[i]);
-	}
+void hsv_libera(hsv **h, int altura){
+	for(int i = 0; i < altura; i++)
+			free(h[i]);
 
 	free(h);
 }
