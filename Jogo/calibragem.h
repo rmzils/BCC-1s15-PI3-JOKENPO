@@ -25,7 +25,7 @@ typedef struct{
 #include <math.h>
 
 parametros *aloca_parametros();
-int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPLAY *janela, ALLEGRO_FONT *fonte, int altura, int largura);
+int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPLAY *janela, ALLEGRO_BITMAP *fundo, ALLEGRO_FONT *fonte, int altura, int largura);
 //void calibra_mao(parametros *p, rastreador *r, hsv **h, camera *cam);
 //void calibra_dedos(parametros *p, rastreador *r, unsigned char ***matriz, camera *cam);
 void libera_parametros(parametros *p);

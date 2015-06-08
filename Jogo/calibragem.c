@@ -15,8 +15,22 @@ parametros *aloca_parametros(){
 	return p;
 }
 
-int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPLAY *janela, ALLEGRO_FONT *fonte, int altura, int largura){
-	ALLEGRO_BITMAP *fundo_calibragem = al_load_bitmap("Bitmaps/fundo_calibragem.png");
+int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPLAY *janela, ALLEGRO_BITMAP *fundo, ALLEGRO_FONT *fonte, int altura, int largura){
+    
+    int iluminacao_media = 0;
+
+    camera_atualiza(cam);
+
+    rgb_hsv(r, cam->quadro, h);
+
+    for(int i = 0; i < cam->altura; i++){
+        for(int j = 0; j < cam->largura; j++)
+            iluminacao_media += h[i][j].iluminacao;
+    }
+
+    iluminacao_media = iluminacao_media/(cam->altura*cam->largura);
+
+    printf("iluminacao: %d\n", iluminacao_media);
 
     ALLEGRO_BITMAP *buffer = al_get_backbuffer(janela);
 
@@ -41,11 +55,11 @@ int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPL
 
     	reseta_disjoint(d);
 
+        al_draw_bitmap(fundo, 0, 0, 0);
+
     	camera_copia(cam, cam->quadro, tela);
 
-    	//al_draw_bitmap(imagem_camera, 0, 0, 0);
-
-    	al_draw_textf(fonte, al_map_rgb(255, 255, 255), (largura / 2), 55, ALLEGRO_ALIGN_CENTRE, "Deixe a mão parada em frente a camera.");
+    	al_draw_textf(fonte, al_map_rgb(255, 0, 255), (largura / 2), 55, ALLEGRO_ALIGN_CENTRE, "Deixe a mão parada em frente a camera.");
 
   		al_flip_display();
 	}
@@ -91,6 +105,8 @@ int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPL
     		descendo = 1;
     	}
 
+        al_draw_bitmap(fundo, 0, 0, 0);
+
 		camera_copia(cam, cam->quadro, tela);
 
         int dx = (largura - r->largura)/2;
@@ -98,11 +114,9 @@ int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPL
 
         al_draw_rectangle(r->w + dx,r->n + dy,r->e + dx,r->s + dy, al_map_rgb(0, 0, 255),1);
 
-        al_draw_line(0, altura/2, largura, altura/2, al_map_rgb(0, 0, 255), 1);
+        al_draw_line((largura - cam->largura)/2, altura/2, (largura + cam->largura)/2, altura/2, al_map_rgb(0, 0, 255), 1);
 
-    	al_draw_textf(fonte, al_map_rgb(255, 255, 255), (largura / 2), 55, ALLEGRO_ALIGN_CENTRE, "Mova sua mão para cima e para baixo da linha.");
-
-        //al_draw_bitmap(imagem_calibragem, 0, 0, 0);
+    	al_draw_textf(fonte, al_map_rgb(255, 0, 255), (largura / 2), 55, ALLEGRO_ALIGN_CENTRE, "Mova sua mão para cima e para baixo da linha.");
 
     	al_flip_display();
 	}

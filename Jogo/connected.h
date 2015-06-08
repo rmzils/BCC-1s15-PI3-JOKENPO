@@ -19,7 +19,5 @@ void une_parentes(disjoint *d, conjunto *c);
 conjunto *find(pixel *p);
 int conta_componentes(disjoint *d);
 void consiste_dedo(disjoint *d);
-void imprime_parentes(conjunto *c);
-
 
 #endif

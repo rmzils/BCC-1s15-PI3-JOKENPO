@@ -115,14 +115,6 @@ void connected_components(rastreador *r, parametros *p, hsv **h, disjoint *d){
 		}
 	}
 
-	for(int i = 0; i < d->n; i++){
-		conjunto *c = d->conjuntos[i];
-		if(c != NULL)
-			imprime_parentes(c);
-	}
-
-	conta_componentes(d);
-
 	une_conjuntos(d);
 }
 
@@ -301,8 +293,6 @@ int conta_componentes(disjoint *d){
 			n++;
 	}
 
-	printf("numero de componentes: %d\n", n);
-
 	return n;
 }
 
@@ -312,13 +302,4 @@ void consiste_dedo(disjoint *d){
 		if(!c->dedo)
 			c->massa = 0;
 	}
-}
-
-void imprime_parentes(conjunto *c){
-	printf("%d: ",c->num);
-	for(arco *a = c->comeco; a != NULL; a = a->prox){
-		conjunto *w = a->w;
-		printf("%d ", w->num);
-	}
-	printf("\n");
 }

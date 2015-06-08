@@ -42,4 +42,6 @@ int game_tutorial(const int LARGURA_TELA, const int ALTURA_TELA, ALLEGRO_EVENT_Q
 
 void erro(char *mensagem);
 
+void game_finaliza(game *g);
+
 #endif

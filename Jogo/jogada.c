@@ -21,11 +21,9 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 
     dilatacao_dedo(r, p, h, 1, 5);
 
-    erosao_dedo(r, p, h, 1, 5);
+    erosao_dedo(r, p, h, 2, 5);
 
-	erosao_dedo(r, p, h, 1, 5);
-
-	dilatacao_dedo(r, p, h, 1, 5);
+	dilatacao_dedo(r, p, h, 2, 5);
 
 	connected_components(r, p, h, d);
 
@@ -35,12 +33,9 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 
 	int conjuntos[quantidade], i = 0;
 
-	printf("componentes no final:");
-
 	for(int j = 0; j < d->n; j++){
 		conjunto *c = d->conjuntos[j];
 		if(c->massa > 0){
-			printf(" %d massa: %d |", c->num, c->massa);
 			conjuntos[i] = c->massa;
 			i++;
 		}

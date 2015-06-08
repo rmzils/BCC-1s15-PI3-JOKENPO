@@ -126,7 +126,6 @@ void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 	if(r->flag_descendo){
 		if(centro_mao >= r->delimitador){
 			r->count++;
-			printf("contador: %d\n", r->count);
 			r->flag_descendo = 0;
 		}
 	}
@@ -145,8 +144,6 @@ void atualiza_angulo(rastreador *r){
 	}
 
 	r->angulo = ((70*centro_mao)/r->altura_min) + 20;
-
-	printf("%d\n", r->angulo);
 }
 
 int contador(rastreador *r){
