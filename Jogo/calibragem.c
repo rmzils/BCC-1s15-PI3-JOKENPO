@@ -1,59 +1,72 @@
 #include "calibragem.h"
 
 parametros *aloca_parametros(){
-	parametros *p = malloc(sizeof(parametros));
+    parametros *p = malloc(sizeof(parametros));
 
-	p->matiz_dedo_min = 240;
-	p->matiz_dedo_max = 360;
-	p->saturacao_dedo = 10;
-	p->matiz_mao_min = 200;
-	p->matiz_mao_max = 240;
-	p->saturacao_mao = 30;
-	p->massa_min = 100;
-	p->k = 5;
+    p->matiz_dedo_min = 240;
+    p->matiz_dedo_max = 320;
+    p->saturacao_dedo = 0;
+    p->matiz_mao_min = 200;
+    p->matiz_mao_max = 240;
+    p->saturacao_mao = 30;
+    p->massa_min = 100;
+    p->k = 5;
 
-	return p;
+    return p;
 }
 
 int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPLAY *janela, ALLEGRO_BITMAP *fundo, ALLEGRO_FONT *fonte, int altura, int largura){
-    
-    int iluminacao_media = 0;
+    ALLEGRO_TIMER *timer = al_create_timer(1.0);
 
-    camera_atualiza(cam);
-
-    rgb_hsv(r, cam->quadro, h);
-
-    for(int i = 0; i < cam->altura; i++){
-        for(int j = 0; j < cam->largura; j++)
-            iluminacao_media += h[i][j].iluminacao;
-    }
-
-    iluminacao_media = iluminacao_media/(cam->altura*cam->largura);
-
-    printf("iluminacao: %d\n", iluminacao_media);
+    ALLEGRO_EVENT_QUEUE *fila = al_create_event_queue();
 
     ALLEGRO_BITMAP *buffer = al_get_backbuffer(janela);
 
     ALLEGRO_BITMAP *tela = al_create_sub_bitmap(buffer, (largura - cam->largura)/2, (altura - cam->altura)/2, cam->largura, cam->altura);
 
+    al_register_event_source(fila, al_get_display_event_source(janela));
+    al_register_event_source(fila, al_get_timer_event_source(timer));
+
+    camera_atualiza(cam);
+
 	disjoint *d = aloca_disjoint(200);
 
 	int componentes = 0;
 
-	while(componentes != 1){
-		camera_atualiza(cam);
+    int tempo = 0, sair = 0;
 
-		rgb_hsv(r, cam->quadro, h);
+    al_start_timer(timer);
 
-		erosao_mao(r, p, h, 3, 3);
+	while(componentes != 1 && tempo < 20 && !sair){
+        camera_atualiza(cam);
 
-    	dilatacao_mao(r, p, h, 3, 3);
+        if(!al_is_event_queue_empty(fila)){
+            ALLEGRO_EVENT evento;
+            al_wait_for_event(fila, &evento);
 
-    	connected_components_mao(r, p, h, d);
+            if(evento.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
+                sair = 1;
+                break;
+            }
 
-    	componentes = conta_componentes(d);
+            if(evento.type == ALLEGRO_EVENT_TIMER && evento.timer.source == timer){
+        		rgb_hsv(r, cam->quadro, h);
 
-    	reseta_disjoint(d);
+        		erosao_mao(r, p, h, 3, 3);
+
+            	dilatacao_mao(r, p, h, 3, 3);
+
+            	connected_components_mao(r, p, h, d);
+
+            	componentes = conta_componentes(d);
+
+                printf("Componentes na tela: %d\n", componentes);
+
+            	reseta_disjoint(d);
+
+                tempo++;
+            }
+        }
 
         al_draw_bitmap(fundo, 0, 0, 0);
 
@@ -66,11 +79,18 @@ int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPL
 
 	libera_disjoint(d);
 
+    al_destroy_timer(timer);
+    al_destroy_event_queue(fila);
+
+    if(sair)
+        return -1;
+
+    if(componentes != 1)
+        return 0;
+
 	atualiza_rastreador(r, p, h);
 
 	int subindo = 0, descendo = 0;
-
-	int sair = 0;
 
 	while(!sair){	
 		camera_atualiza(cam);

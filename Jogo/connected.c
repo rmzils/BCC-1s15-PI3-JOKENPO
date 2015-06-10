@@ -299,7 +299,7 @@ int conta_componentes(disjoint *d){
 void consiste_dedo(disjoint *d){
 	for(int i = 0; i < d->n; i++){
 		conjunto *c = d->conjuntos[i];
-		if(!c->dedo)
+		if(!c->dedo || c->massa < 200)
 			c->massa = 0;
 	}
 }

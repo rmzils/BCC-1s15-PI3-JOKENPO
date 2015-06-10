@@ -24,205 +24,105 @@ ALLEGRO_BITMAP *fundo = NULL,
 			   *papel = NULL,
 			   *lagarto = NULL,
 			   *pedra = NULL,
-			   *tutorial = NULL;
+			   *tutorial = NULL,
+               *jogadas = NULL,
+               *regras = NULL;
 ALLEGRO_FONT *fonte = NULL;
-ALLEGRO_TIMER *timer_jogo = NULL;
 
-bool inicializar(const int LARGURA_TELA, const int ALTURA_TELA)
+void inicializar(const int LARGURA_TELA, const int ALTURA_TELA)
 {
 	if (!al_init())
-    {
-        fprintf(stderr, "Falha ao inicializar a Allegro.\n");
-        return false;
-    }
+        erro("nao foi possivel inicializar o allegro");
  
     al_init_font_addon();
  
     if (!al_init_ttf_addon())
-    {
-        fprintf(stderr, "Falha ao inicializar add-on allegro_ttf.\n");
-        return false;
-    }
- 
+        erro("Falha ao inicializar add-on allegro_ttf.");
+
     if (!al_init_image_addon())
-    {
-        fprintf(stderr, "Falha ao inicializar add-on allegro_image.\n");
-        return false;
-    }
+        erro("Falha ao inicializar add-on allegro_image.");
 
     if(!al_init_primitives_addon())
         erro("nao foi possivel inicializar adicional de primitivas");
  
     if (!al_install_keyboard())
-    {
-        fprintf(stderr, "Falha ao inicializar o teclado.\n");
-        return false;
-    }
+        erro("Falha ao inicializar o teclado.");
 
     janela = al_create_display(LARGURA_TELA, ALTURA_TELA);
     if (!janela)
-    {
-        fprintf(stderr, "Falha ao criar janela.\n");
-        return false;
-    }
+        erro("Falha ao criar janela.");
+
     al_set_window_title(janela, "Utilizando o Teclado");
- 
-    fonte = al_load_font("Fonts/comic.ttf", 40, 0);
+
+    fonte = al_load_font("Fonts/stormfaze.ttf", 40, 0);
     if (!fonte)
-    {
-        fprintf(stderr, "Falha ao carregar \"fonte comic.ttf\".\n");
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao carregar fonte.");
  
     fila_eventos = al_create_event_queue();
     if (!fila_eventos)
-    {
-        fprintf(stderr, "Falha ao criar fila de eventos.\n");
-        al_destroy_display(janela);
-        al_destroy_font(fonte);
-        return false;
-    }
+        erro("Falha ao criar fila de eventos.");
  
     fundo = al_load_bitmap("Bitmaps/fundo.png");
     if (!fundo)
-    {
-        fprintf(stderr, "Falha ao carregar imagem de fundo.\n");
-        al_destroy_display(janela);
-        al_destroy_font(fonte);
-        al_destroy_event_queue(fila_eventos);
-        return false;
-    }
+        erro("Falha ao carregar imagem de fundo.");
 
     // Torna apto o uso de mouse na aplicação
     if (!al_install_mouse())
-    {
-        fprintf(stderr, "Falha ao inicializar o mouse.\n");
-        al_destroy_display(janela);
-        al_destroy_font(fonte);
-        al_destroy_event_queue(fila_eventos);
-        return false;
-    }
+        erro("Falha ao inicializar o mouse.");
  
     // Atribui o cursor padrão do sistema para ser usado
     if (!al_set_system_mouse_cursor(janela, ALLEGRO_SYSTEM_MOUSE_CURSOR_DEFAULT))
-    {
-        fprintf(stderr, "Falha ao atribuir ponteiro do mouse.\n");
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao atribuir ponteiro do mouse.");
  
     botao_jogar = al_load_bitmap("Bitmaps/jogar.png");
     if (!botao_jogar)
-    {
-        fprintf(stderr, "Falha ao criar botão jogar.\n");
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão jogar.");
  
     botao_sair = al_load_bitmap("Bitmaps/sair.png");
     if (!botao_sair)
-    {
-        fprintf(stderr, "Falha ao criar botão de saída.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão de saída.");
 
     botao_tutorial = al_load_bitmap("Bitmaps/tutorial.png");
     if (!botao_tutorial)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     botao_voltar = al_load_bitmap("Bitmaps/voltar.png");
     if (!botao_tutorial)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     tutorial = al_load_bitmap("Bitmaps/fundotutorial.png");
     if (!tutorial)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
+
+    jogadas = al_load_bitmap("Bitmaps/Jogadas.png");
+    if (!jogadas)
+        erro("Falha ao criar botão do tutorial.");
+
+    regras = al_load_bitmap("Bitmaps/Regras.png");
+    if (!regras)
+        erro("Falha ao criar botão do tutorial.");
 
     tesoura = al_load_bitmap("Bitmaps/scissors.png");
     if (!tesoura)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     spock = al_load_bitmap("Bitmaps/spock.png");
     if (!spock)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     papel = al_load_bitmap("Bitmaps/paper.png");
     if (!papel)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     lagarto = al_load_bitmap("Bitmaps/lizard.png");
     if (!lagarto)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
     pedra = al_load_bitmap("Bitmaps/rock.png");
     if (!pedra)
-    {
-        fprintf(stderr, "Falha ao criar botão do tutorial.\n");
-        al_destroy_bitmap(botao_jogar);
-        al_destroy_bitmap(botao_sair);
-        al_destroy_bitmap(botao_tutorial);
-        al_destroy_display(janela);
-        return false;
-    }
+        erro("Falha ao criar botão do tutorial.");
 
-   timer_jogo = al_create_timer(1.0);
-   if(!timer_jogo) {
-      fprintf(stderr, "failed to create timer!\n");
-      return false;
-   }
-
-   if(!al_install_audio())
+    if(!al_install_audio())
         erro("nao foi possivel instalar audio");
 
     if(!al_init_acodec_addon())
@@ -234,9 +134,6 @@ bool inicializar(const int LARGURA_TELA, const int ALTURA_TELA)
     al_register_event_source(fila_eventos, al_get_keyboard_event_source());
     al_register_event_source(fila_eventos, al_get_display_event_source(janela));
     al_register_event_source(fila_eventos, al_get_mouse_event_source());
-    al_register_event_source(fila_eventos, al_get_timer_event_source(timer_jogo));
-
-    return true;
 }
 
 void menu()
@@ -247,15 +144,12 @@ void menu()
     bool sair = false;
     int flag;
 
-    if (!inicializar(LARGURA_TELA, ALTURA_TELA))
-    {
-        return;
-    }
+    inicializar(LARGURA_TELA, ALTURA_TELA);
 
     while (!sair)
     {
         // Verificamos se há eventos na fila
-        while (!al_is_event_queue_empty(fila_eventos))
+        if (!al_is_event_queue_empty(fila_eventos))
         {
             ALLEGRO_EVENT evento;
             al_wait_for_event(fila_eventos, &evento);
@@ -295,7 +189,9 @@ void menu()
                     evento.mouse.y >= (ALTURA_TELA / 3) - 50 - al_get_bitmap_height(botao_jogar) / 2 &&
                     evento.mouse.y <= (ALTURA_TELA / 3) - 50 + al_get_bitmap_height(botao_jogar) / 2)
                 {
-                    game_turn(janela, LARGURA_TELA, ALTURA_TELA, fonte, fundo, timer_jogo, fila_eventos);
+                    flag = game_turn(janela, LARGURA_TELA, ALTURA_TELA, fonte);
+                    if(flag == -1)
+                        sair = true;
                 }
                 else if (evento.mouse.x >= (LARGURA_TELA / 2) - al_get_bitmap_width(botao_tutorial) / 2 &&
                     	 evento.mouse.x <= (LARGURA_TELA / 2) + al_get_bitmap_width(botao_tutorial) / 2 &&
@@ -303,7 +199,7 @@ void menu()
                     	 evento.mouse.y <= (ALTURA_TELA / 2) - 40 + al_get_bitmap_height(botao_tutorial) / 2)
                 {
                 	flag = game_tutorial(LARGURA_TELA, ALTURA_TELA, fila_eventos, fundo, botao_voltar, tutorial, janela, 
-                		tesoura, spock, papel, lagarto, pedra, fonte);
+                        tesoura, spock, papel, lagarto, pedra, jogadas, regras, fonte);
                 	if (flag == -1)
             		{
             			sair = true;
@@ -324,6 +220,7 @@ void menu()
         }
 
         al_draw_bitmap(fundo, 0, 0, 0);
+        al_draw_text(fonte, al_map_rgb(0, 0, 255), LARGURA_TELA / 2, 90, ALLEGRO_ALIGN_CENTRE, "RAINBOW-PO");
         
         al_set_target_bitmap(al_get_backbuffer(janela));
         al_draw_bitmap(botao_jogar, (LARGURA_TELA / 2) - al_get_bitmap_width(botao_jogar) / 2,
@@ -344,7 +241,5 @@ void menu()
     al_destroy_bitmap(tutorial);
     al_destroy_bitmap(fundo);
     al_destroy_display(janela);
-    al_destroy_event_queue(fila_eventos);
     al_destroy_font(fonte);
-    al_destroy_timer(timer_jogo);
 }

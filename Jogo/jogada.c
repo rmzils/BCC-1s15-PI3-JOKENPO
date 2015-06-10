@@ -1,11 +1,13 @@
 #include "jogada.h"
 
 void sort(int conjuntos[], int quantidade){
-	for(int i = 0; i < quantidade - 1; i++){
-		if(conjuntos[i + 1] > conjuntos[i]){
-			int aux = conjuntos[i];
-			conjuntos[i] = conjuntos[i + 1];
-			conjuntos[i + 1] = aux;
+	for(int n = 0; n < quantidade; n++, quantidade--){
+		for(int i = 0; i < quantidade - 1; i++){
+			if(conjuntos[i + 1] > conjuntos[i]){
+				int aux = conjuntos[i];
+				conjuntos[i] = conjuntos[i + 1];
+				conjuntos[i + 1] = aux;
+			}
 		}
 	}
 }
@@ -45,16 +47,11 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 
 	int jogada = -1;
 
-	printf("\n");
-
-	printf("Numero de componentes: %d\n", i);
-
 	if(i == 1)
 		return 0;
 	
 	if(i == 2){
 		sort(conjuntos, quantidade);
-
 		if(conjuntos[0] > 2*conjuntos[1])
 			return 1;
 
@@ -66,10 +63,10 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 
 		int media = (conjuntos[0] + conjuntos[2])/2;
 
-		if(conjuntos[1] >= media)
-			return 4;
+		if(conjuntos[1] < media)
+			return 2;
 
-		return 2;
+		return 4;
 	}
 
 	if(i == 5)

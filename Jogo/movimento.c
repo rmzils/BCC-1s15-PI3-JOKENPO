@@ -31,8 +31,8 @@ void atualiza_delimitador(rastreador *r, int deli){
 int detecta_movimento(rastreador *r, unsigned char ***quadro1, unsigned char ***quadro2){
 	int pixel_diferente = 0;
 
-	for(int i = 0; i < r->altura; i++){
-		for(int j = 0; j < r->largura; j++){
+	for(int i = r->n; i < r->s; i++){
+		for(int j = r->w; j < r->e; j++){
 			int r = quadro1[i][j][0] - quadro2[i][j][0];
 			if(r < 0)
 				r *= -1;
@@ -48,7 +48,7 @@ int detecta_movimento(rastreador *r, unsigned char ***quadro1, unsigned char ***
 			if(r >= 30 && g >= 30 && b >= 30)
 				pixel_diferente++;
 
-			if(pixel_diferente > 1000)
+			if(pixel_diferente > 500)
 				return 1;
 		}
 	}
@@ -59,11 +59,12 @@ int detecta_movimento(rastreador *r, unsigned char ***quadro1, unsigned char ***
 void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 	int i,j;
 	int north = r->n; 
+	int safe_zone = 75;
 
 	for(i = r->n; i < r->s && north == r->n; i++){
 		for(j = r->w + 1; j < r->e; j++){
 			if(pixel_mao(p, &h[i][j])){
-				north = i - 50;
+				north = i - safe_zone;
 				if(north < 0)
 					north = 0;
 				break;
@@ -79,7 +80,7 @@ void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 	for(i = r->s; i >= r->n && south == r->s; i--){
 		for(j = r->w; j < r->e; j++){
 			if(pixel_mao(p, &h[i][j])){
-				south = i + 50;
+				south = i + safe_zone;
 				if(south > r->altura)
 					south = r->altura;
 				break;
@@ -92,7 +93,7 @@ void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 	for(j = r->w; j < r->e && west == r->w; j++){
 		for(i = r->n; i < r->s; i++){
 			if(pixel_mao(p, &h[i][j])){
-				west = j - 50;
+				west = j - safe_zone;
 				if(west < 0)
 					west = 0;
 				break;
@@ -108,7 +109,7 @@ void atualiza_rastreador(rastreador *r, parametros *p, hsv **h){
 	for(j = r->e; j >= r->w && east == r->e; j--){
 		for(i = r->n; i < r->s; i++){
 			if(pixel_mao(p, &h[i][j])){
-				east = j + 50;
+				east = j + safe_zone;
 				if(east > r->largura)
 					east = r->largura;
 				break;
@@ -147,10 +148,8 @@ void atualiza_angulo(rastreador *r){
 }
 
 int contador(rastreador *r){
-	if(r->count == 3){
-		r->count = 0;
+	if(r->count == 3)
 		return 1;
-	}
 	return 0;
 }
 
