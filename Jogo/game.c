@@ -115,6 +115,10 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
     if(!cam)
         erro("nao foi possivel inicializar camera");
 
+    ALLEGRO_BITMAP *buffer = al_get_backbuffer(janela);
+
+    ALLEGRO_BITMAP *tela = al_create_sub_bitmap(buffer, 0, 90, cam->largura, cam->altura);
+
     ALLEGRO_TIMER *tempo = NULL;
     tempo = al_create_timer(1.0);
     ALLEGRO_TIMER *fps = NULL;
@@ -135,6 +139,10 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
     ALLEGRO_SAMPLE *samples[11];
     if(!aloca_samples(samples))
         erro("nao foi possivel carregar samples");
+
+    ALLEGRO_AUDIO_STREAM *musica = al_load_audio_stream("Musicas/Spaceman.ogg", 4, 1024);
+    if(!musica)
+        erro("nao foi possivel carregar musicas");
 
     rastreador *r = aloca_rastreador(altura, largura);
 
@@ -173,6 +181,9 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
 
     else
         al_play_sample(samples[0], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+
+    al_attach_audio_stream_to_mixer(musica, al_get_default_mixer());
+    al_set_audio_stream_playing(musica, 1);
 
     int fim_jogo = 0;
     int tecla = 0; 
@@ -241,32 +252,28 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
                     al_draw_textf(fonte, al_map_rgb(255, 255, 255), LARGURA_TELA/2, ALTURA_TELA - 200,
                                 ALLEGRO_ALIGN_CENTER, "Contador: %d", r->count);
 
+                    camera_copia(cam, cam->quadro, tela);
+                    
+                    al_draw_rectangle(r->w,r->n + 90,r->e,r->s + 90, al_map_rgb(0, 0, 255),1);
+
+                    al_draw_line(0, 90 + r->delimitador, cam->largura, 90 + r->delimitador, al_map_rgb(0, 0, 255), 1);
+
                     if(g->rodada > 0){
                         jogada = g->p->jogada[g->rodada - 1];
 
-                        if(jogada != -1){
-                            al_draw_textf(fonte, al_map_rgb(255, 255, 255), LARGURA_TELA - 150, 90, 
-                                    ALLEGRO_ALIGN_CENTRE, "Ultima Jogada:");
-
-                            if(jogada != 3)
-                                al_draw_bitmap(jogadas[jogada], LARGURA_TELA - 250, 130, 0);
-                            else
-                                al_draw_bitmap(jogadas[g->p->jogada[5]], LARGURA_TELA - 250, 130, 0);
+                        if(aguardar > 0 && jogada != -1){
+                            imprime_mao(r, ALTURA_TELA, LARGURA_TELA + LARGURA_TELA/2, jogadas, jogada_npc);
+                            aguardar--;
                         }
+                        
+                        else
+                            aguardar = 0;
                     }
 
                     if(aguardar == 0 && g->fase != 3){
-                        atualiza_angulo(r);
-                        imprime_mao(r, ALTURA_TELA, LARGURA_TELA, jogadas, 0);
+                            atualiza_angulo(r);
+                            imprime_mao(r, ALTURA_TELA, LARGURA_TELA + LARGURA_TELA/2, jogadas, 0);
                     }
-
-                    else if(aguardar > 0 && jogada != -1){
-                        imprime_mao(r, ALTURA_TELA, LARGURA_TELA, jogadas, jogada_npc);
-                        aguardar--;
-                    }
-
-                    else
-                        aguardar = 0;
 
                     if(g->fase == 1){
                         if(!contador(r)){
@@ -348,7 +355,7 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
 
                         int jogada_player = analiza_jogada(r, p, h);
 
-                        al_flip_display();   
+                        al_flip_display();
 
                         adiciona_jogada(g->p, rodada, jogada_player);
 
@@ -433,6 +440,8 @@ int game_turn(ALLEGRO_DISPLAY *janela, const int LARGURA_TELA, const int ALTURA_
     }
     else
         flag = -1;
+
+    al_set_audio_stream_playing(musica, 0);
 
     al_destroy_bitmap(fundo_jogo);
     

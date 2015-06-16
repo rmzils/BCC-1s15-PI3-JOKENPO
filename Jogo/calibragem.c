@@ -3,9 +3,9 @@
 parametros *aloca_parametros(){
     parametros *p = malloc(sizeof(parametros));
 
-    p->matiz_dedo_min = 240;
-    p->matiz_dedo_max = 320;
-    p->saturacao_dedo = 0;
+    p->matiz_dedo_min = 260;
+    p->matiz_dedo_max = 360;
+    p->saturacao_dedo = 10;
     p->matiz_mao_min = 200;
     p->matiz_mao_max = 240;
     p->saturacao_mao = 30;
@@ -29,7 +29,7 @@ int calibragem(parametros *p, rastreador *r, hsv **h, camera *cam, ALLEGRO_DISPL
 
     camera_atualiza(cam);
 
-	disjoint *d = aloca_disjoint(200);
+	disjoint *d = aloca_disjoint(1000);
 
 	int componentes = 0;
 

@@ -58,7 +58,7 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 		return 3;
 	}
 
-	if(i == 3){
+	if(i == 3 || i == 4){
 		sort(conjuntos, quantidade);
 
 		int media = (conjuntos[0] + conjuntos[2])/2;
@@ -69,7 +69,7 @@ int analiza_jogada(rastreador *r, parametros *p, hsv **h){
 		return 4;
 	}
 
-	if(i == 5)
+	if(i >= 5)
 		return 1;
 
 	return -1;
